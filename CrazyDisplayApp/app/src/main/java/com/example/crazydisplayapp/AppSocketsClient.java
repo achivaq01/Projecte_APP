@@ -6,7 +6,7 @@ import java.net.URI;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 public class AppSocketsClient extends WebSocketClient{
-
+    AppData appData = AppData.getInstance();
     public AppSocketsClient(URI serverUri) {
         super(serverUri);
     }
@@ -14,6 +14,7 @@ public class AppSocketsClient extends WebSocketClient{
     @Override
     public void onOpen(ServerHandshake handshake) {
         Log.i("infoServer", "on Open");
+        appData.connectionStatus = AppData.ConnectionStatus.CONNECTED;
     }
 
     @Override

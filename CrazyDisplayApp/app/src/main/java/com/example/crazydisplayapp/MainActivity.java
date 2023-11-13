@@ -6,38 +6,57 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 
 public class MainActivity extends AppCompatActivity {
+    AppData appData = AppData.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         Button buttonConnect = (Button) findViewById(R.id.buttonConn);
+        Button buttonSend = (Button) findViewById(R.id.buttonSend);
+
+        EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("info", "Dentro del boton");
-                connectToWebSocket("192.168.0.100","8888");
+                appData.connectToWebSocket("192.168.0.21","8888");
+                PropertyChangeListener listenerConnection = new PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        Log.i("INFO", "Ha cambiado el Connected");
+                    }
+                };
+
+                Log.i("INFO", String.valueOf(appData.connectionStatus));
             }
         });
-    }
 
-    public void connectToWebSocket(String ip, String port) {
-        // declaramos  valores para conectarnos al WebSocket
-        // Esto mas tarde ha de ser dinamico, de momento ponemos lo valores estaticos
-        String uriString = "ws://"+ip+":"+port;
-        Log.i("info", "dentro de la funcion para connectar "+uriString);
-        try {
-            AppSocketsClient myAppSocketClient = new AppSocketsClient(new URI("ws://192.168.17.134:8888"));
-            myAppSocketClient.connect();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JSONObject message = new JSONObject();
+                try {
+                    message.put("platform", "Android");
+                    message.put("text", editTextMessage.getText());
+                    Log.i("info", "enviando mensaje");
+                    appData.socketClient.send(message.toString());
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
 
+            }
+        });
     }
 }
