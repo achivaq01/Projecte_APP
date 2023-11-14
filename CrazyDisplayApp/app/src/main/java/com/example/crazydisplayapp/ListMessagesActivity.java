@@ -1,9 +1,11 @@
 package com.example.crazydisplayapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -48,5 +50,13 @@ public class ListMessagesActivity extends AppCompatActivity {
         // Busquem la ListView i li endollem l'ArrayAdapter
         ListView lv = findViewById(R.id.messagesView);
         lv.setAdapter(adapter);
+
+        Button buttonBack = (Button) findViewById(R.id.buttonBack);
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Intent(ListMessagesActivity.this, WriteMessagesActivity.class);
+            }
+        });
     }
 }

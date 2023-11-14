@@ -1,5 +1,6 @@
 package com.example.crazydisplayapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +22,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_write_messages);
 
         Button buttonSend = (Button) findViewById(R.id.buttonSend);
-
+        Button buttonView = (Button) findViewById(R.id.buttonView);
         EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
 
         buttonSend.setOnClickListener(new View.OnClickListener() {
@@ -36,6 +37,12 @@ public class WriteMessagesActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
+            }
+        });
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Intent(WriteMessagesActivity.this, ListMessagesActivity.class);
             }
         });
     }

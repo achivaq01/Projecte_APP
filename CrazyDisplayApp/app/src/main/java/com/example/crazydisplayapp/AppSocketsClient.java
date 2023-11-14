@@ -1,5 +1,6 @@
 package com.example.crazydisplayapp;
 
+import android.content.Intent;
 import android.util.Log;
 
 import java.net.URI;
@@ -13,7 +14,6 @@ public class AppSocketsClient extends WebSocketClient{
     @Override
     public void onOpen(ServerHandshake handshake) {
         Log.i("infoServer", "on Open");
-        appData.connectionStatus = AppData.ConnectionStatus.CONNECTED;
     }
     @Override
     public void onMessage(String message) {

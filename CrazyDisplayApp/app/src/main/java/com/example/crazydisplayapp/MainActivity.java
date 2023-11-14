@@ -2,6 +2,7 @@ package com.example.crazydisplayapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,14 +23,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button buttonConnect = (Button) findViewById(R.id.buttonConn);
-        EditText editTextMessage = (EditText) findViewById(R.id.editTextIP);
+        EditText editTextIP = (EditText) findViewById(R.id.editTextIP);
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     Log.i("info", "Dentro del boton");
-                    appData.connectToWebSocket(editTextMessage.getText().toString());
+                    appData.connectToWebSocket(editTextIP.getText().toString());
                     PropertyChangeListener listenerConnection = new PropertyChangeListener() {
                         @Override
                         public void propertyChange(PropertyChangeEvent evt) {
@@ -40,7 +41,14 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                     Toast.makeText(getApplicationContext(), "Error connecting to the RPI.", Toast.LENGTH_SHORT).show();
                 }
+
                 Log.i("INFO", String.valueOf(appData.connectionStatus));
+
+                if (appData.connectionStatus == AppData.ConnectionStatus.CONNECTED) {
+                    new Intent(MainActivity.this, WriteMessagesActivity.class);
+                } else {
+                    Toast.makeText(getApplicationContext(), "You have written an incorrect Wifi IP. RPI is not connected.", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
