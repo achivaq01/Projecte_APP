@@ -11,9 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 public class WriteMessagesActivity extends AppCompatActivity {
     AppData appData = AppData.getInstance();
     @Override
@@ -21,11 +18,12 @@ public class WriteMessagesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_messages);
 
-        Button buttonSend = (Button) findViewById(R.id.buttonSend);
+        Button buttonSendMessage = (Button) findViewById(R.id.buttonSendMessage);
+        Button buttonSendImage = (Button) findViewById(R.id.buttonSendImage);
         Button buttonView = (Button) findViewById(R.id.buttonView);
         EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
 
-        buttonSend.setOnClickListener(new View.OnClickListener() {
+        buttonSendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONObject message = new JSONObject();
@@ -37,6 +35,12 @@ public class WriteMessagesActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
+            }
+        });
+        buttonSendImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Intent(WriteMessagesActivity.this, ListImagesActivity.class);
             }
         });
         buttonView.setOnClickListener(new View.OnClickListener() {

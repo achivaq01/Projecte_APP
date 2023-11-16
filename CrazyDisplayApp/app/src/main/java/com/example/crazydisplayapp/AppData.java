@@ -16,8 +16,7 @@ public class AppData {
         return instance;
     }
     public void connectToWebSocket(String ip) {
-        // declaramos  valores para conectarnos al WebSocket
-        // Esto mas tarde ha de ser dinamico, de momento ponemos lo valores estaticos
+        // Declaramos  valores para conectarnos al WebSocket
         String uriString = "ws://" + ip;
         Log.i("info", "dentro de la funcion para connectar " + uriString);
         try {

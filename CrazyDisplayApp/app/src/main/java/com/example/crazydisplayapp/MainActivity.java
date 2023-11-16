@@ -10,9 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 public class MainActivity extends AppCompatActivity {
