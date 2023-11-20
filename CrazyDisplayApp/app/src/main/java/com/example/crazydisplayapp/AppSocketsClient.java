@@ -14,14 +14,13 @@ public class AppSocketsClient extends WebSocketClient{
     public void onOpen(ServerHandshake handshake) {
         Log.i("infoServer", "on Open");
         appData.connectionStatus = AppData.ConnectionStatus.CONNECTED;
-        Log.i("INFO", "Conectat :)");
     }
     @Override
     public void onMessage(String message) {
-        Log.i("infoServer", "on Message: "+message);
+        Log.i("infoServer", "on Message: " + message);
     }
     @Override
-    public void onClose(int code, String reason, boolean remote) {Log.i("infoServer", "Connection closed: " + code + " " + reason);}
+    public void onClose(int code, String reason, boolean remote) { Log.i("infoServer", "Connection closed: " + code + " " + reason); }
     @Override
     public void onError(Exception ex) {
         Log.i("infoServer", "ERROR: "+ex.getMessage());

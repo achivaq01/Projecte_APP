@@ -3,6 +3,7 @@ package com.example.crazydisplayapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,10 +13,16 @@ import android.widget.Toast;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     AppData appData = AppData.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -35,14 +42,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     };
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("ERROR", Objects.requireNonNull(e.getMessage()));
                     Toast.makeText(getApplicationContext(), "Error connecting to the RPI.", Toast.LENGTH_SHORT).show();
                 }
 
                 Log.i("INFO", String.valueOf(appData.connectionStatus));
 
                 if (appData.connectionStatus == AppData.ConnectionStatus.CONNECTED) {
-                    new Intent(MainActivity.this, WriteMessagesActivity.class);
+                    startActivity(new Intent(MainActivity.this, WriteMessagesActivity.class));
                 } else {
                     Toast.makeText(getApplicationContext(), "You have written an incorrect Wifi IP. RPI is not connected.", Toast.LENGTH_LONG).show();
                 }
