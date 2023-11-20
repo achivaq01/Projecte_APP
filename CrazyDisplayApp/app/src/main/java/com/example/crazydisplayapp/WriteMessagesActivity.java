@@ -31,7 +31,7 @@ import java.util.Date;
 public class WriteMessagesActivity extends AppCompatActivity {
     Button buttonSendMessage, buttonSendImage, buttonView;
     AppData appData = AppData.getInstance();
-    ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
+    static ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
     private void logUserDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -43,46 +43,8 @@ public class WriteMessagesActivity extends AppCompatActivity {
         builder.setView(user);
         builder.setPositiveButton("Next", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                try {
-                    // Obrim l'arxiu 'server.json' des del directori Assets
-                    InputStream inputStream = openFileInput("server.json");
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-
-                    // Llegim el contingut actual de l'arxiu 'server.json'
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    inputStream.close();
-                    inputStreamReader.close();
-                    bufferedReader.close();
-
-                    // Convertim el contingut a un JSONArray
-                    JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-
-                    // Comprovem si el nom d'usuari que hem inserit existeix dins l'arxiu 'server.json'
-                    boolean userExists = false;
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        if (user.getText().toString().equals(jsonArray.getJSONObject(i).getString("user"))) {
-                            userExists = true;
-                            break;
-                        }
-                    }
-
-                    if (userExists) {
-                        logPasswordDialog(user.getText().toString());
-                        dialog.dismiss();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "The user does not exist.", Toast.LENGTH_SHORT).show();
-                    }
-
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
+                logPasswordDialog(user.getText().toString());
+                dialog.dismiss();
             }
         });
         builder.create().show();
@@ -90,56 +52,16 @@ public class WriteMessagesActivity extends AppCompatActivity {
     private void logPasswordDialog(String user) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Log In");
-        builder.setMessage("Hello " + user + "! Write your password");
+        builder.setMessage("Write your password");
         // Inserim la contrasenya del nostre compte
         EditText password = new EditText(this);
         builder.setView(password);
         builder.setPositiveButton("Log in", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                try {
-                    // Obrim l'arxiu 'server.json' des del directori Assets
-                    InputStream inputStream = openFileInput("server.json");
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-
-                    // Llegim el contingut actual de l'arxiu 'server.json'
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    inputStream.close();
-                    inputStreamReader.close();
-                    bufferedReader.close();
-
-                    // Convertim el contingut a un JSONArray
-                    JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-
-                    // Comprovem si la contrassenya que hem inserit pertany a l'usuari amb el que estem intentat iniciar sessió
-                    boolean validPassword = false;
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        if (user.equals(jsonArray.getJSONObject(i).getString("user"))) {
-                            if (password.getText().toString().equals(jsonArray.getJSONObject(i).getString("password"))) {
-                                validPassword = true;
-                            }
-                            break;
-                        }
-                    }
-
-                    if (validPassword) {
-                        buttonSendMessage.setEnabled(true);
-                        buttonSendImage.setEnabled(true);
-                        buttonView.setEnabled(true);
-                        dialog.dismiss();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "The password that you have written is not " + user + "'s one.", Toast.LENGTH_LONG).show();
-                    }
-
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
+                buttonSendMessage.setEnabled(true);
+                buttonSendImage.setEnabled(true);
+                buttonView.setEnabled(true);
+                dialog.dismiss();
             }
         });
         builder.create().show();
@@ -159,6 +81,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
             @SuppressLint("SimpleDateFormat")
             @Override
             public void onClick(View v) {
+
                 File file = new File(getFilesDir(), "messages.json");
                 if (!file.exists()) {
                     // Creem l'arxiu 'messages.json' en cas de que no existeixi
@@ -170,50 +93,39 @@ public class WriteMessagesActivity extends AppCompatActivity {
                 }
 
                 try {
-                    // Obrim l'arxiu 'messages.json' des del directori intern de l'aplicació
-                    InputStream inputStream = openFileInput("messages.json");
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-
-                    // Llegim el contingut actual de l'arxiu 'messages.json'
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    inputStream.close();
-                    inputStreamReader.close();
-                    bufferedReader.close();
-
-                    // Convertim el contingut a un JSONArray
-                    JSONArray jsonArray;
-                    if (stringBuilder.length() > 0) {
-                        jsonArray = new JSONArray(stringBuilder.toString());
-                    } else {
-                        jsonArray = new JSONArray();
-                    }
-
                     // Afegim el nou missatge com un objecte JSONObject
                     JSONObject message = new JSONObject();
                     message.put("platform", "Android");
                     message.put("text", editTextMessage.getText());
-                    message.put("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
                     Log.i("INFO", "Enviando mensaje");
 
-                    // Afegim el nou missatge al JSONArray
-                    jsonArray.put(message);
+                    // Enviem el nou missatge al RPI
+                    if (appData.socketClient != null && appData.socketClient.getConnection().isOpen()) {
+                        appData.socketClient.send(message.toString());
+                        Log.i("INFO", "Messatge enviat");
+                        Log.i("INFO", message.toString());
+                    } else {
+                        Log.e("ERROR", "El missatge no s'ha pogut enviar");
+                    }
 
-                    // Desem el nou missatge a l'arxiu 'messages.json'
+                    message.put("date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                    Log.i("INFO", "Data afegida");
+                    Log.i("INFO", message.toString());
+
+                    // Afegim el nou missatge a l'ArrayList de missatges
+                    messages.add(new JSONObject(message.toString()));
+                    Log.i("INFO", "Missatge afegit a l'ArrayList de missatges");
+                    Log.i("INFO", messages.toString());
+
                     FileOutputStream fileOutputStream = getApplicationContext().openFileOutput("messages.json", Context.MODE_PRIVATE);
-                    fileOutputStream.write(jsonArray.toString().getBytes());
+                    fileOutputStream.write(message.toString().getBytes());
                     fileOutputStream.close();
 
-                    Log.i("INFO", "Message written to file");
-                    Log.i("INFO", jsonArray.toString());
+                    Log.i("INFO", "Missatge inserit a l'arxiu");
+                    Log.i("INFO", message.toString());
 
                 } catch (IOException | JSONException e) {
-                    Log.e("ERROR", "Error writing message to file: " + e.getMessage());
+                    Log.e("ERROR", "Error inserint el missatge a l'arxiu: " + e.getMessage());
                 }
             }
         });
@@ -242,50 +154,6 @@ public class WriteMessagesActivity extends AppCompatActivity {
         buttonLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                File file = new File(getFilesDir(), "server.json");
-                if (!file.exists()) {
-                    // Creem l'arxiu 'server.json' en cas de que no existeixi
-                    try {
-                        file.createNewFile();
-                        // Obrim l'arxiu 'server.json' des del directori intern de l'aplicació
-                        InputStream inputStream = openFileInput("server.json");
-                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line;
-
-                        // Llegim el contingut actual del fitxer JSON
-                        while ((line = bufferedReader.readLine()) != null) {
-                            stringBuilder.append(line);
-                        }
-
-                        inputStream.close();
-                        inputStreamReader.close();
-                        bufferedReader.close();
-
-                        // Convertim el contingut a un JSONArray
-                        JSONArray jsonArray;
-                        if (stringBuilder.length() > 0) {
-                            jsonArray = new JSONArray(stringBuilder.toString());
-                        } else {
-                            jsonArray = new JSONArray();
-                        }
-
-                        // Afegim el nou contacte com un objecte JSONObject
-                        JSONObject server = new JSONObject();
-                        server.put("user", "ieti@192.168.0.21");
-                        server.put("password", "ieti");
-                        jsonArray.put(server);
-
-                        // Guardem el nou contingut al fitxer JSON
-                        FileOutputStream fileOutputStream = getApplicationContext().openFileOutput("server.json", Context.MODE_PRIVATE);
-                        fileOutputStream.write(jsonArray.toString().getBytes());
-                        fileOutputStream.close();
-
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
                 logUserDialog();
             }
         });

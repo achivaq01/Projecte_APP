@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 public class ListImagesActivity extends AppCompatActivity {
-    // Model = Taula d'items': utilitzem ArrayList
+    // Model = Taula d'items: utilitzem ArrayList
     ArrayList<String> items;
     // ArrayAdapter serà l'intermediari amb la ListView
     ArrayAdapter<String> adapter;
