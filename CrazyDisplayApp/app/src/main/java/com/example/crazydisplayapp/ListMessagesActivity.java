@@ -19,6 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -38,23 +42,23 @@ public class ListMessagesActivity extends AppCompatActivity {
         }
     }
     // Model = Taula de missatges: utilitzem ArrayList
-    Set<Message> messages;
+    ArrayList<Message> messages;
     // ArrayAdapter serà l'intermediari amb la ListView
     ArrayAdapter<Message> adapter;
     // Obtenim l'instància de l'AppData
     AppData appData = AppData.getInstance();
     private void resendMessageDialog(int index) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Reenviament de missatges");
-        builder.setMessage("Estàs segur de que vols reenviar aquest missatge?");
+        builder.setTitle("Resending messages");
+        builder.setMessage("Are you sure you want to resend this message?");
         builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Afegim el missatge com un objecte JSONObject
                 JSONObject message = new JSONObject();
                 try {
                     message.put("platform", "Android");
-                    message.put("text", WriteMessagesActivity.messages.get(index).getString("text"));
-                    Log.i("INFO", "Enviando mensaje");
+                    message.put("text", messages.get(index).text);
+                    Log.i("INFO", "Enviant missatge");
 
                     // Enviem el missatge al RPI
                     if (appData.socketClient != null && appData.socketClient.getConnection().isOpen()) {
@@ -84,28 +88,43 @@ public class ListMessagesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list_items);
 
         // Inicialitzem model
-        messages = new HashSet<>();
+        messages = new ArrayList<Message>();
 
-        // Obtenim les dades de l'ArrayList de missatges
-        if (!WriteMessagesActivity.messages.isEmpty()) {
-            for (JSONObject message : WriteMessagesActivity.messages) {
-                try {
-                    // Afegim cada element de l'ArrayList de missatges al Set de missatges
+        try {
+            // Obrim l'arxiu 'messages.txt' des del directori Assets
+            InputStream inputStream = openFileInput("messages.txt");
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String line;
+
+            // Afegim cada línia de l'arxiu a l'ArrayList de missatges
+            while ((line = bufferedReader.readLine()) != null) {
+                // Convertim cada línia de l'arxiu a un JSONObject
+                JSONObject message = new JSONObject(line);
+                // Comprovem si el missatge actual està repetit
+                boolean isRepeated = false;
+                if (messages.size() > 0) {
+                    for (int i = 0; i < messages.size(); i++) {
+                        if (message.getString("text").equals(messages.get(i).text)) {
+                            isRepeated = true;
+                        }
+                    }
+                }
+                if (!isRepeated) {
                     messages.add(new Message(message.getString("date"), message.getString("text")));
-                    Log.i("INFO", "Missatge afegit");
-                    Log.i("INFO", messages.toString());
-
-                } catch (JSONException e) {
-                    Log.e("ERROR", "Error retrieving message fields: " + e.getMessage());
                 }
             }
-        } else {
-            Log.i("INFO", "No messages available");
+
+            inputStream.close();
+            inputStreamReader.close();
+            bufferedReader.close();
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
         }
         adapter = new ArrayAdapter<Message>(this, R.layout.list_message, new ArrayList<>(messages)) {
             @NonNull
             public View getView(int pos, View convertView, @NonNull ViewGroup container) {
-
                 // GetView ens construeix el layout i hi "pinta" els valors de l'element en la posició pos
                 if (convertView == null) {
                     // Inicialitzem l'element la View amb el seu layout

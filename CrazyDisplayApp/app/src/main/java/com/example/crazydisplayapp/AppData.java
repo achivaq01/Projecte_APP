@@ -17,7 +17,7 @@ public class AppData {
     }
     public void connectToWebSocket(String ip) {
         // Declaramos  valores para conectarnos al WebSocket
-        String uriString = "ws://" + ip;
+        String uriString = "ws://" + ip + ":8888";
         Log.i("info", "dentro de la funcion para connectar " + uriString);
         try {
             AppSocketsClient myAppSocketClient = new AppSocketsClient(new URI(uriString));

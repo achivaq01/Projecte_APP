@@ -82,9 +82,9 @@ public class WriteMessagesActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                File file = new File(getFilesDir(), "messages.json");
+                File file = new File(getFilesDir(), "messages.txt");
                 if (!file.exists()) {
-                    // Creem l'arxiu 'messages.json' en cas de que no existeixi
+                    // Creem l'arxiu 'messages.txt' en cas de que no existeixi
                     try {
                         file.createNewFile();
                     } catch (IOException e) {
@@ -97,7 +97,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
                     JSONObject message = new JSONObject();
                     message.put("platform", "Android");
                     message.put("text", editTextMessage.getText());
-                    Log.i("INFO", "Enviando mensaje");
+                    Log.i("INFO", "Enviant missatge");
 
                     // Enviem el nou missatge al RPI
                     if (appData.socketClient != null && appData.socketClient.getConnection().isOpen()) {
@@ -117,8 +117,9 @@ public class WriteMessagesActivity extends AppCompatActivity {
                     Log.i("INFO", "Missatge afegit a l'ArrayList de missatges");
                     Log.i("INFO", messages.toString());
 
-                    FileOutputStream fileOutputStream = getApplicationContext().openFileOutput("messages.json", Context.MODE_PRIVATE);
-                    fileOutputStream.write(message.toString().getBytes());
+                    FileOutputStream fileOutputStream = getApplicationContext().openFileOutput("messages.txt", Context.MODE_APPEND);
+                    fileOutputStream.write(message.toString().getBytes()); // Escrivim les dades d'un nou contacte
+                    fileOutputStream.write(System.lineSeparator().getBytes()); // Afegeim un salt de línia
                     fileOutputStream.close();
 
                     Log.i("INFO", "Missatge inserit a l'arxiu");

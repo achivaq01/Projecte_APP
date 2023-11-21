@@ -18,7 +18,7 @@
         android:theme="@style/Theme.CrazyDisplayApp"
         tools:targetApi="31">
         <activity
-            android:name=".WriteMessagesActivity"
+            android:name=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".ListMessagesActivity"
@@ -27,7 +27,7 @@
             android:name=".ListImagesActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".WriteMessagesActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
