@@ -16,14 +16,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -137,7 +132,9 @@ public class ListMessagesActivity extends AppCompatActivity {
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ListMessagesActivity.this, WriteMessagesActivity.class));
+                Intent intent = new Intent(ListMessagesActivity.this, WriteMessagesActivity.class);
+                intent.putExtra("isLogged", true);
+                startActivity(intent);
             }
         });
     }

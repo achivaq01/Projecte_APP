@@ -10,25 +10,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 public class WriteMessagesActivity extends AppCompatActivity {
+    boolean isLogged;
     Button buttonSendMessage, buttonSendImage, buttonView;
     AppData appData = AppData.getInstance();
     static ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
@@ -58,9 +53,10 @@ public class WriteMessagesActivity extends AppCompatActivity {
         builder.setView(password);
         builder.setPositiveButton("Log in", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                buttonSendMessage.setEnabled(true);
-                buttonSendImage.setEnabled(true);
-                buttonView.setEnabled(true);
+                isLogged = true;
+                buttonSendMessage.setEnabled(isLogged);
+                buttonSendImage.setEnabled(isLogged);
+                buttonView.setEnabled(isLogged);
                 dialog.dismiss();
             }
         });
@@ -74,9 +70,13 @@ public class WriteMessagesActivity extends AppCompatActivity {
 
         EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
 
+        // Inicialitzem en nostre booleà amb un altre que rebem de les classes 'ListMessagesActivity.java' i 'ListImages.java'
+        isLogged = getIntent().getBooleanExtra("isLogged", false);
+
         // Botó per enviar missatges
         buttonSendMessage = (Button) findViewById(R.id.buttonSendMessage);
-        buttonSendMessage.setEnabled(false);
+        // Comprovem si l'usuari s'ha pogut enregistrar
+        buttonSendMessage.setEnabled(isLogged);
         buttonSendMessage.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SimpleDateFormat")
             @Override
@@ -132,7 +132,8 @@ public class WriteMessagesActivity extends AppCompatActivity {
 
         // Botó per canviar a la classe 'ListImagesActivity.java'
         buttonSendImage = (Button) findViewById(R.id.buttonSendImage);
-        buttonSendImage.setEnabled(false);
+        // Comprovem si l'usuari s'ha pogut enregistrar
+        buttonSendImage.setEnabled(isLogged);
         buttonSendImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,7 +143,8 @@ public class WriteMessagesActivity extends AppCompatActivity {
 
         // Botó per canviar a la classe 'ListMessagesActivity.java'
         buttonView = (Button) findViewById(R.id.buttonView);
-        buttonView.setEnabled(false);
+        // Comprovem si l'usuari s'ha pogut enregistrar
+        buttonView.setEnabled(isLogged);
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
