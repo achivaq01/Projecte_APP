@@ -81,8 +81,7 @@ public class ListImagesActivity extends AppCompatActivity {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     byte[] imageBytes = baos.toByteArray();
-                    String base64String = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-                    Log.i("INFO", base64String);
+                    String base64String = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
                     base64Images.add(base64String);
                 }
 
@@ -91,6 +90,7 @@ public class ListImagesActivity extends AppCompatActivity {
                 try {
                     image.put("type", "image");
                     image.put("img", base64Images.get(position));
+                    Log.i("INFO", base64Images.get(position));
                     Log.i("INFO", "Enviant imatge");
 
                     // Enviem el la imatge convertida a base 64 al RPI
