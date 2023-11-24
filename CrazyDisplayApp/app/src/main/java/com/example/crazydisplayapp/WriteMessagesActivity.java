@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,36 +29,69 @@ public class WriteMessagesActivity extends AppCompatActivity {
     Button buttonSendMessage, buttonSendImage, buttonView;
     AppData appData = AppData.getInstance();
     static ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
-    private void logUserDialog() {
+    @SuppressLint("InflateParams")
+    private void logInDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Log In");
-        builder.setMessage("Write a user name");
 
-        // Inserim un nom d'usuari
-        EditText user = new EditText(this);
-        builder.setView(user);
-        builder.setPositiveButton("Next", new DialogInterface.OnClickListener() {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_login, null);
+        builder.setView(view);
+
+        EditText editTextUser = (EditText) view.findViewById(R.id.editTextUser);
+        EditText editTextPassword = (EditText) view.findViewById(R.id.editTextPassword);
+
+        builder.setPositiveButton("Log in", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                logPasswordDialog(user.getText().toString());
-                dialog.dismiss();
+                try {
+                    // Afegim l'usuari i la seva contrasenya com un objecte JSONObject
+                    JSONObject user = new JSONObject();
+                    user.put("platform", "Android");
+                    user.put("type", "login");
+                    user.put("id", appData.userId);
+                    user.put("user", editTextUser.getText().toString());
+                    user.put("password", editTextPassword.getText().toString());
+                    Log.i("INFO", "Enviant usuari");
+
+                    // Enviem l'usuari i la seva contrasenya al servidor
+                    if (appData.socketClient != null && appData.socketClient.getConnection().isOpen()) {
+                        appData.socketClient.send(user.toString());
+                        Log.i("INFO", "Usuari enviat");
+                        Log.i("INFO", user.toString());
+                    } else {
+                        Log.e("ERROR", "L'usuari no s'ha pogut enviar");
+                    }
+
+                } catch (JSONException e) {
+                    Log.e("ERROR", "Error inserint l'usuari: " + e.getMessage());
+                }
+                appData.connectWriteMessagesToWebSocket(new WriteMessagesActivity.ConnectionCallback() {
+                    @Override
+                    public void onCalled() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Log.i("INFO", String.valueOf(appData.userStatus));
+                                buttonSendMessage.setEnabled(appData.userStatus);
+                                Log.i("INFO", String.valueOf(appData.userStatus));
+                                buttonSendImage.setEnabled(appData.userStatus);
+                                Log.i("INFO", String.valueOf(appData.userStatus));
+                                buttonView.setEnabled(appData.userStatus);
+                                Log.i("INFO", String.valueOf(appData.userStatus));
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                });
             }
         });
         builder.create().show();
     }
-    private void logPasswordDialog(String user) {
+    private void consultCustomersDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Log In");
-        builder.setMessage("Write your password");
-        // Inserim la contrasenya del nostre compte
-        EditText password = new EditText(this);
-        builder.setView(password);
-        builder.setPositiveButton("Log in", new DialogInterface.OnClickListener() {
+        builder.setTitle("Connected customers");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                isLogged = true;
-                buttonSendMessage.setEnabled(isLogged);
-                buttonSendImage.setEnabled(isLogged);
-                buttonView.setEnabled(isLogged);
                 dialog.dismiss();
             }
         });
@@ -96,6 +131,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
                     // Afegim el nou missatge com un objecte JSONObject
                     JSONObject message = new JSONObject();
                     message.put("platform", "Android");
+                    message.put("type", "string");
                     message.put("text", editTextMessage.getText());
                     Log.i("INFO", "Enviant missatge");
 
@@ -152,13 +188,26 @@ public class WriteMessagesActivity extends AppCompatActivity {
                 startActivity(new Intent(WriteMessagesActivity.this, ListMessagesActivity.class));
             }
         });
+
         // Botó per iniciar sessió al servidor
         Button buttonLogIn = (Button) findViewById(R.id.buttonLogIn);
         buttonLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logUserDialog();
+                logInDialog();
             }
         });
+
+        // Botó per mostrar la llista dels clients connectats
+        Button buttonCustomers = (Button) findViewById(R.id.buttonCustomers);
+        buttonCustomers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                consultCustomersDialog();
+            }
+        });
+    }
+    public interface ConnectionCallback {
+        void onCalled();
     }
 }

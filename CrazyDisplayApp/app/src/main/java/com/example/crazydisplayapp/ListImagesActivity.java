@@ -90,7 +90,6 @@ public class ListImagesActivity extends AppCompatActivity {
                 try {
                     image.put("type", "image");
                     image.put("img", base64Images.get(position));
-                    Log.i("INFO", base64Images.get(position));
                     Log.i("INFO", "Enviant imatge");
 
                     // Enviem el la imatge convertida a base 64 al RPI

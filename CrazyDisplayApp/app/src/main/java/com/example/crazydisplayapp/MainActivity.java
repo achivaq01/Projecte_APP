@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     AppData appData = AppData.getInstance();
@@ -28,27 +26,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    Log.i("info", "Dentro del boton");
-                    appData.connectToWebSocket(editTextIP.getText().toString());
-                    PropertyChangeListener listenerConnection = new PropertyChangeListener() {
+                    Log.i("INFO", "Dins del botó");
+
+                    appData.connectMainToWebSocket(editTextIP.getText().toString(), new ConnectionCallback() {
                         @Override
-                        public void propertyChange(PropertyChangeEvent evt) {
-                            Log.i("INFO", "Ha cambiado el Connected");
+                        public void onCalled() {
+                            Log.i("INFO", "Ha cambiat el Connected");
+                            Log.i("INFO", String.valueOf(appData.connectionStatus));
+                            if (appData.connectionStatus == AppData.ConnectionStatus.CONNECTED) {
+                                startActivity(new Intent(MainActivity.this, WriteMessagesActivity.class));
+                            } else {
+                                Toast.makeText(getApplicationContext(), "You have written an incorrect Wifi IP. RPI is not connected.", Toast.LENGTH_LONG).show();
+                            }
                         }
-                    };
+                    });
                 } catch (Exception e) {
                     Log.e("ERROR", Objects.requireNonNull(e.getMessage()));
                     Toast.makeText(getApplicationContext(), "Error connecting to the RPI.", Toast.LENGTH_SHORT).show();
                 }
-
-                Log.i("INFO", String.valueOf(appData.connectionStatus));
-
-                if (appData.connectionStatus == AppData.ConnectionStatus.CONNECTED) {
-                    startActivity(new Intent(MainActivity.this, WriteMessagesActivity.class));
-                } else {
-                    Toast.makeText(getApplicationContext(), "You have written an incorrect Wifi IP. RPI is not connected.", Toast.LENGTH_LONG).show();
-                }
             }
         });
+    }
+    public interface ConnectionCallback {
+        void onCalled();
     }
 }

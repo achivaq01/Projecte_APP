@@ -57,6 +57,7 @@ public class ListMessagesActivity extends AppCompatActivity {
                 JSONObject message = new JSONObject();
                 try {
                     message.put("platform", "Android");
+                    message.put("type", "string");
                     message.put("text", messages.get(index).text);
                     Log.i("INFO", "Enviant missatge");
 
