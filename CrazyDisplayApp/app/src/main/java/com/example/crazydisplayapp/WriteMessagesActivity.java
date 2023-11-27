@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.Objects;
 public class WriteMessagesActivity extends AppCompatActivity {
     boolean isLogged;
-    Button buttonSendMessage, buttonSendImage, buttonView, buttonCustomers;
+    Button buttonSendMessage, buttonSendImage, buttonView, buttonLogIn, buttonCustomers;
     AppData appData = AppData.getInstance();
     private static final ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
     @SuppressLint("StaticFieldLeak")
@@ -91,6 +91,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
                                 buttonSendMessage.setEnabled(appData.userStatus);
                                 buttonSendImage.setEnabled(appData.userStatus);
                                 buttonView.setEnabled(appData.userStatus);
+                                buttonLogIn.setEnabled(!appData.userStatus);
                                 buttonCustomers.setEnabled(appData.userStatus);
                                 dialog.dismiss();
                             }
@@ -249,7 +250,8 @@ public class WriteMessagesActivity extends AppCompatActivity {
         });
 
         // Botó per iniciar sessió al servidor
-        Button buttonLogIn = (Button) findViewById(R.id.buttonLogIn);
+        buttonLogIn = (Button) findViewById(R.id.buttonLogIn);
+        buttonLogIn.setEnabled(!isLogged);
         buttonLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
