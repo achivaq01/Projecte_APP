@@ -38,6 +38,7 @@ public class ListImagesActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_items);
+        appData.setCurrentContext(this);
 
         // Inicialitzem model
         images = new ArrayList<Integer>();

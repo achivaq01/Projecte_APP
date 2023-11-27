@@ -2,18 +2,26 @@ package com.example.crazydisplayapp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,11 +32,20 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 public class WriteMessagesActivity extends AppCompatActivity {
     boolean isLogged;
-    Button buttonSendMessage, buttonSendImage, buttonView;
+    Button buttonSendMessage, buttonSendImage, buttonView, buttonCustomers;
     AppData appData = AppData.getInstance();
-    static ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
+    private static final ArrayList<JSONObject> messages = new ArrayList<JSONObject>();
+    @SuppressLint("StaticFieldLeak")
+    private static final WriteMessagesActivity instance = new WriteMessagesActivity();
+    public static WriteMessagesActivity getInstance() {
+        return instance;
+    }
+    public void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
     @SuppressLint("InflateParams")
     private void logInDialog() {
 
@@ -71,13 +88,10 @@ public class WriteMessagesActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                // Log.i("INFO", String.valueOf(appData.userStatus));
                                 buttonSendMessage.setEnabled(appData.userStatus);
-                                Log.i("INFO", String.valueOf(appData.userStatus));
                                 buttonSendImage.setEnabled(appData.userStatus);
-                                Log.i("INFO", String.valueOf(appData.userStatus));
                                 buttonView.setEnabled(appData.userStatus);
-                                Log.i("INFO", String.valueOf(appData.userStatus));
+                                buttonCustomers.setEnabled(appData.userStatus);
                                 dialog.dismiss();
                             }
                         });
@@ -88,8 +102,52 @@ public class WriteMessagesActivity extends AppCompatActivity {
         builder.create().show();
     }
     private void consultCustomersDialog() {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Connected customers");
+
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_customers, null);
+        builder.setView(view);
+
+        // Model = Taula de clients: utilitzem ArrayList
+        ArrayList<String> customers = new ArrayList<String>();
+        // ArrayAdapter serà l'intermediari amb la ListView
+        ArrayAdapter<String> adapter;
+
+        // Afegim l'id i la plataforma de tots els clients connectats al servidor
+        if (appData.userList != null) {
+            try {
+                for (int i = 0; i < appData.userList.size(); i++) {
+                    String id = new JSONObject(appData.userList.get(i).toString()).getString("id");
+                    String platform = new JSONObject(appData.userList.get(i).toString()).getString("platform");
+                    customers.add("Customer " + id + ", Platform " + platform);
+                }
+                Log.i("INFO", "S'han emmagatzemat els clients connectats");
+                Log.i("INFO", customers.toString());
+            } catch (JSONException e) {
+                Log.i("ERROR", Objects.requireNonNull(e.getMessage()));
+            }
+        }
+
+        // Inicialitzem l'ArrayAdapter amb el layout pertinent
+        adapter = new ArrayAdapter<String>(this, R.layout.list_message, new ArrayList<>(customers)) {
+            @NonNull
+            public View getView(int pos, View convertView, @NonNull ViewGroup container) {
+                // GetView ens construeix el layout i hi "pinta" els valors de l'element en la posició pos
+                if (convertView == null) {
+                    // Inicialitzem l'element la View amb el seu layout
+                    convertView = getLayoutInflater().inflate(R.layout.list_message, container, false);
+                }
+                // "Pintem" els valors (també quan es refresca)
+                ((TextView) convertView.findViewById(R.id.message)).setText(getItem(pos));
+                return convertView;
+            }
+        };
+
+        // Busquem la ListView i li endollem l'ArrayAdapter
+        ListView lv = view.findViewById(R.id.customersView);
+        lv.setAdapter(adapter);
+
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 dialog.dismiss();
@@ -102,6 +160,7 @@ public class WriteMessagesActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_messages);
+        appData.setCurrentContext(this);
 
         EditText editTextMessage = (EditText) findViewById(R.id.editTextMessage);
 
@@ -199,7 +258,8 @@ public class WriteMessagesActivity extends AppCompatActivity {
         });
 
         // Botó per mostrar la llista dels clients connectats
-        Button buttonCustomers = (Button) findViewById(R.id.buttonCustomers);
+        buttonCustomers = (Button) findViewById(R.id.buttonCustomers);
+        buttonCustomers.setEnabled(isLogged);
         buttonCustomers.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

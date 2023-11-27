@@ -51,7 +51,7 @@ public class ListMessagesActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Resending messages");
         builder.setMessage("Are you sure you want to resend this message?");
-        builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Afegim el missatge com un objecte JSONObject
                 JSONObject message = new JSONObject();
@@ -87,6 +87,7 @@ public class ListMessagesActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_items);
+        appData.setCurrentContext(this);
 
         // Inicialitzem model
         messages = new ArrayList<Message>();

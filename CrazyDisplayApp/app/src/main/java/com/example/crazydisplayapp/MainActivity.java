@@ -13,11 +13,17 @@ import android.widget.Toast;
 import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     AppData appData = AppData.getInstance();
+
+    private static final MainActivity instance = new MainActivity();
+    public static MainActivity getInstance() {
+        return instance;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        appData.setCurrentContext(this);
 
         Button buttonConnect = (Button) findViewById(R.id.buttonConn);
         EditText editTextIP = (EditText) findViewById(R.id.editTextIP);
