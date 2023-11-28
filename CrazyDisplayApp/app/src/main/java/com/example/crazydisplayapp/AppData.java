@@ -29,7 +29,7 @@ public class AppData extends AppCompatActivity {
         return instance;
     }
     public void connectMainToWebSocket(String ip, MainActivity.ConnectionCallback callback) {
-        // Declarem valors per connectar-nos al WebSocket
+        // Declarem valors per connectar-nos al Servidor WebSocket
         String uriString = "ws://" + ip + ":8888";
         Log.i("INFO", "Dins de la funció per connectar " + uriString);
         try {
