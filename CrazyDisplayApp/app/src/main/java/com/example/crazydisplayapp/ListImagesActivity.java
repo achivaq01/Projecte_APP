@@ -50,6 +50,10 @@ public class ListImagesActivity extends AppCompatActivity {
         images.add(R.drawable.image4);
         images.add(R.drawable.image5);
         images.add(R.drawable.image6);
+        images.add(R.drawable.image7);
+        images.add(R.drawable.image8);
+        images.add(R.drawable.image9);
+        images.add(R.drawable.image10);
 
         // Inicialitzem l'ArrayAdapter amb el layout pertinent
         adapter = new ArrayAdapter<Integer>(this, R.layout.list_image, images) {
